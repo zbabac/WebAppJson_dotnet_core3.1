@@ -42,7 +42,7 @@ namespace WebAppJson.Models
 
             public MysqlDataContext(string connectionString)
             {
-                ConnectionString = connectionString;
+                ConnectionString = "server=localhost;user=sensor_admin;password=8*aKaziDino;database=sensors";
             }
 
             static MySqlConnection GetConnection()
@@ -52,75 +52,108 @@ namespace WebAppJson.Models
 
             public static SensorOutput GetOneSensor(string DevId)
             {
-                SensorOutput sensorData = new SensorOutput();
-                //
-                MySqlConnection conn = GetConnection();
-                conn.Open();
-                MySqlCommand cmd = new MySqlCommand("select * from sensors.sensors where devid = '"+DevId+"'", conn);
-
-                using (var reader = cmd.ExecuteReader())
+                try
                 {
+                    SensorOutput sensorData = new SensorOutput();
+                    //
+                    MySqlConnection conn = GetConnection();
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand("select * from sensors where devid = '" + DevId + "'", conn);
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
                         while (reader.Read())
                         {
                             sensorData.devid = Convert.ToString(reader["devid"]);
-                            sensorData.time = Convert.ToDateTime(reader["time"]);
+                            string time = Convert.ToString(reader["last_time"]);
+                            sensorData.time = Convert.ToDateTime(reader["last_time"]);
                             sensorData.lat = (float)reader["lat"];
                             sensorData.lon = (float)reader["lon"];
                             sensorData.alt = (float)reader["alt"];
                             sensorData.channel = Convert.ToString(reader["channel"]);
-                            sensorData.rssi = (float)reader["rssi"];
-                            sensorData.snr = (float)reader["snr"];
-                            sensorData.freq = (float)reader["alt"];
-                            sensorData.port = (int)reader["port"];
-                            sensorData.payload_hex = Convert.ToString(reader["payload_hex"]);
+
                         }
-                    
+
+                    }
+                    return sensorData;
                 }
-                return sensorData;
+                catch (Exception e)
+                {
+                    string t = e.Message;
+                    return null;
+                }
             }
 
             public static async Task InsertSensorHistory(SensorOutput sensorInput)
             {
-                using (MySqlConnection conn = GetConnection())
+                try
                 {
-                    conn.Open();
-                    MySqlCommand cmd = new MySqlCommand("INSERT INTO `sensors.history` (`devid`, `time`, `lat`, `lon`, `alt`, `rssi`, `snr`, `freq`, `port`, `payload_hex`)" + 
-                        "VALUES ("+sensorInput.devid+", "+sensorInput.time+", "+sensorInput.lat+", "+sensorInput.lon+", "+sensorInput.alt+", "+sensorInput.channel+
-                        ", "+sensorInput.rssi+", "+sensorInput.snr+", "+sensorInput.freq+", "+sensorInput.freq+", "+sensorInput.port+", "+sensorInput.payload_hex+");", conn);
-                    
-                    await cmd.ExecuteNonQueryAsync();
+                    using (MySqlConnection conn = GetConnection())
+                    {
+                        conn.Open();
+                        MySqlCommand cmd = new MySqlCommand("INSERT INTO `history` (`devid`, `time`, `lat`, `lon`, `alt`, `channel`, `rssi`, `snr`, `freq`, `port`, `payload_hex`)" +
+                            "VALUES ('" + sensorInput.devid + "', '" + sensorInput.time + "', " + sensorInput.lat + ", " + sensorInput.lon + ", " + sensorInput.alt + ", '" + sensorInput.channel +
+                            "', " + sensorInput.rssi + ", " + sensorInput.snr + ", " + sensorInput.freq + ", " + sensorInput.port + ", '" + sensorInput.payload_hex + "');", conn);
+
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+                catch (Exception e)
+                {
+                    string t = e.Message;
                 }
             }
             public static async Task InsertNewSensorId(SensorOutput sensorInput)
             {
-                using (MySqlConnection conn = GetConnection())
+                try
                 {
-                    conn.Open();
-                    MySqlCommand cmd = new MySqlCommand("INSERT INTO `sensors.sensors` (`devid`, `tennantid`, `name`, `Last_time`, `lat`, `lon`, `alt`, `rssi`, `snr`, `freq`, `port`, `payload_hex`)" +
-                        "VALUES (" + sensorInput.devid + ", '1', " + sensorInput.devid + ", " + sensorInput.time + ", " + sensorInput.lat + ", " + sensorInput.lon + ", " +
-                        sensorInput.alt + ", " + sensorInput.channel + ", " + sensorInput.rssi + ", " + sensorInput.snr + ", " + sensorInput.freq + ", " + sensorInput.freq + ", " + sensorInput.port + ", " + sensorInput.payload_hex + ");", conn);
+                    using (MySqlConnection conn = GetConnection())
+                    {
+                        conn.Open();
+                        MySqlCommand cmd = new MySqlCommand("INSERT INTO `sensors` (`devid`, `tennantid`, `name`, `Last_time`, `lat`, `lon`, `alt`, `channel`)" +
+                            "VALUES ('" + sensorInput.devid + "', '1', '" + sensorInput.devid + "', '" + sensorInput.time + "', " + sensorInput.lat + ", " + sensorInput.lon + ", " +
+                            sensorInput.alt + ", '" + sensorInput.channel + "');", conn);
 
-                    await cmd.ExecuteNonQueryAsync();
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+                catch (Exception e)
+                {
+                    string t = e.Message;
                 }
             }
             public static async Task UpdateSensorTime(SensorOutput sensorInput)
             {
-                using (MySqlConnection conn = GetConnection())
+                try
                 {
-                    conn.Open();
-                    MySqlCommand cmd = new MySqlCommand("UPDATE `sensors.sensors` SET last_time='"+sensorInput.time+"' WHERE devid='"+sensorInput.devid+"';", conn);
+                    using (MySqlConnection conn = GetConnection())
+                    {
+                        conn.Open();
+                        MySqlCommand cmd = new MySqlCommand("UPDATE `sensors` SET last_time='" + sensorInput.time + "' WHERE devid='" + sensorInput.devid + "';", conn);
 
-                    await cmd.ExecuteNonQueryAsync();
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+                catch (Exception e)
+                {
+                    string t = e.Message;
                 }
             }
             public static async Task UpdateSensorNameTennant(string devid, string name, int tennantid)
             {
-                using (MySqlConnection conn = GetConnection())
+                try
                 {
-                    conn.Open();
-                    MySqlCommand cmd = new MySqlCommand("UPDATE `sensors.sensors` SET name='" + name + "', tennantid='"+tennantid+ "' WHERE devid='" + devid + "';", conn);
+                    using (MySqlConnection conn = GetConnection())
+                    {
+                        conn.Open();
+                        MySqlCommand cmd = new MySqlCommand("UPDATE `sensors` SET name='" + name + "', tennantid='" + tennantid + "' WHERE devid='" + devid + "';", conn);
 
-                    await cmd.ExecuteNonQueryAsync();
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+                catch (Exception e)
+                {
+                    string t = e.Message;
                 }
             }
         }

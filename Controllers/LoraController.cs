@@ -38,23 +38,32 @@ namespace WebAppJson.Controllers
             await cmd.ExecuteNonQueryAsync();
             //Id = (int)cmd.LastInsertedId;
         }*/
-
+        [Route("/")]
         [HttpPost]
-        public SensorOutput JsonFromServer([FromBody] SensorOutput jsonBody)
+        [Consumes("application/json")]
+        public IActionResult JsonFromServer([FromBody] SensorOutput jsonBody)
         {
-            // Get data from POST body sent by Lora server, only subset defined in the class SensorOutput is imported.
-            // This class will be inserted in DB.
-            if (MysqlDataContext.GetOneSensor(jsonBody.devid) is null)
+            try
             {
-                MysqlDataContext.InsertNewSensorId(jsonBody);
-                MysqlDataContext.InsertSensorHistory(jsonBody);
+                // Get data from POST body sent by Lora server, only subset defined in the class SensorOutput is imported.
+                // This class will be inserted in DB.
+                if (MysqlDataContext.GetOneSensor(jsonBody.devid).devid is null)
+                {
+                    MysqlDataContext.InsertNewSensorId(jsonBody);
+                    MysqlDataContext.InsertSensorHistory(jsonBody);
+                }
+                else
+                {
+                    MysqlDataContext.InsertSensorHistory(jsonBody);
+                    MysqlDataContext.UpdateSensorTime(jsonBody);
+                }
+                return Ok();
             }
-            else
+            catch (Exception exc)
             {
-                MysqlDataContext.InsertSensorHistory(jsonBody);
-                MysqlDataContext.UpdateSensorTime(jsonBody);
+                string err = exc.Message;
+                return Ok();
             }
-            return jsonBody;
         }
 
         /*

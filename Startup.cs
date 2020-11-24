@@ -27,8 +27,9 @@ namespace WebAppJson
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.Add(new ServiceDescriptor(typeof(MysqlDataContext), new MysqlDataContext(Configuration.GetConnectionString("DefaultConnection"))));
-            //services.AddTransient<AppDb>(_ => new AppDb(Configuration["ConnectionStrings:DefaultConnection"]));
+            services.Add(new ServiceDescriptor(typeof(MysqlDataContext), new MysqlDataContext(Configuration.GetConnectionString("mysqlserver"))));
+            //services.AddTransient<MysqlDataContext>(_ => new MysqlDataContext(Configuration["ConnectionStrings:Default"]));
+            int t = 0;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
