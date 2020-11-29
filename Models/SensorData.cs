@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MySqlConnector;
+using System.Globalization;
 
 namespace WebAppJson.Models
 {
@@ -16,7 +17,7 @@ namespace WebAppJson.Models
             [JsonPropertyName("DevEUI")]
             public string devid { get; set; }
             [JsonPropertyName("DevLocTime")]
-            public DateTime time { get; set; }
+            public string time { get; set; }
 
             [JsonPropertyName("Channel")]
             public string channel { get; set; }
@@ -64,9 +65,11 @@ namespace WebAppJson.Models
                     {
                         while (reader.Read())
                         {
+                            var isoDateTimeFormat = CultureInfo.InvariantCulture.DateTimeFormat.SortableDateTimePattern;
                             sensorData.devid = Convert.ToString(reader["devid"]);
-                            string time = Convert.ToString(reader["last_time"]);
-                            sensorData.time = Convert.ToDateTime(reader["last_time"]);
+                            string format = "yyyy-mm-dd hh:mm:ss";
+                            string time = Convert.ToDateTime(reader["last_time"]).ToString(format);
+                            sensorData.time = time;
                             sensorData.lat = (float)reader["lat"];
                             sensorData.lon = (float)reader["lon"];
                             sensorData.alt = (float)reader["alt"];

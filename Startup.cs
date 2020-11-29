@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -29,7 +31,16 @@ namespace WebAppJson
             services.AddControllers();
             services.Add(new ServiceDescriptor(typeof(MysqlDataContext), new MysqlDataContext(Configuration.GetConnectionString("mysqlserver"))));
             //services.AddTransient<MysqlDataContext>(_ => new MysqlDataContext(Configuration["ConnectionStrings:Default"]));
-            int t = 0;
+            // IWebHostEnvironment (stored in _env) is injected into the Startup class.
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor |
+                    ForwardedHeaders.XForwardedProto;
+
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -39,7 +50,14 @@ namespace WebAppJson
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            else // Production
+            {
+                app.UseExceptionHandler("/Error");
+                // Remove to use HTTP only
+                app.UseHsts(); // HTTPS Strict mode
+            }
+            
+            app.UseForwardedHeaders();
             app.UseHttpsRedirection();
 
             app.UseRouting();
