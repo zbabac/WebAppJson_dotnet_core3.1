@@ -38,16 +38,22 @@ namespace WebAppJson.Controllers
             await cmd.ExecuteNonQueryAsync();
             //Id = (int)cmd.LastInsertedId;
         }*/
+        // Route / is neccessary to tell controller where is the app that handles request
         [Route("/")]
         [HttpPost]
+        // this is optional, tells the controller that requests are formatted as json
         [Consumes("application/json")]
+        // Controller watches requests and is triggered by POST, 
+        // it then checks http body and stores it in SensorOutput class var
         public IActionResult JsonFromServer([FromBody] SensorOutput jsonBody)
         {
             try
             {
+                //DevEUIUplink devroot = new DevEUIUplink();
+                //devroot = jsonBody.DevEUI_uplink;
                 // Get data from POST body sent by Lora server, only subset defined in the class SensorOutput is imported.
-                // This class will be inserted in DB.
-                if (MysqlDataContext.GetOneSensor(jsonBody.devid).devid is null)
+                // This class will be inserted in DB. Class and methods defined in SensorData,cs
+                if (MysqlDataContext.GetOneSensor(jsonBody.DevEUI_uplink.devid).devid is null)
                 {
                     MysqlDataContext.InsertNewSensorId(jsonBody);
                     MysqlDataContext.InsertSensorHistory(jsonBody);
@@ -62,7 +68,7 @@ namespace WebAppJson.Controllers
             catch (Exception exc)
             {
                 string err = exc.Message;
-                return Ok();
+                return Ok(err);
             }
         }
 

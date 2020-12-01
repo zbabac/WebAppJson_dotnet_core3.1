@@ -12,30 +12,39 @@ namespace WebAppJson.Models
 {
     public class SensorData
     {
-        public class SensorOutput
+        public class DevEUIUplink
         {
+            // define type of vars that are parsed from json and inserted in DB
             [JsonPropertyName("DevEUI")]
             public string devid { get; set; }
             [JsonPropertyName("DevLocTime")]
             public string time { get; set; }
+            public string Time { get; set; }
 
             [JsonPropertyName("Channel")]
             public string channel { get; set; }
             [JsonPropertyName("DevLAT")]
-            public float lat { get; set; }
+            public string lat { get; set; }
+            public string latLrrLAT { get; set; }
             [JsonPropertyName("DevLON")]
-            public float lon { get; set; }
+            public string lon { get; set; }
+            public string latLrrLON { get; set; }
             [JsonPropertyName("DevALT")]
-            public float alt { get; set; }
+            public string alt { get; set; }
             [JsonPropertyName("LrrRSSI")]
-            public float rssi { get; set; }
+            public string rssi { get; set; }
             [JsonPropertyName("LrrSNR")]
-            public float snr { get; set; }
+            public string snr { get; set; }
             [JsonPropertyName("Frequency")]
-            public float freq { get; set; }
+            public string freq { get; set; }
             [JsonPropertyName("FPort")]
-            public int port { get; set; }
+            public string port { get; set; }
             public string payload_hex { get; set; }
+        }
+
+        public class SensorOutput
+        {
+            public DevEUIUplink DevEUI_uplink { get; set; }
         }
         public class MysqlDataContext
         {
@@ -43,6 +52,7 @@ namespace WebAppJson.Models
 
             public MysqlDataContext(string connectionString)
             {
+                // this is odd, for some reason gets empty strinf from Startup.cs so I add workaround here
                 ConnectionString = "server=localhost;user=sensor_admin;password=8*aKaziDino;database=sensors";
             }
 
@@ -51,11 +61,12 @@ namespace WebAppJson.Models
                 return new MySqlConnection(ConnectionString);
             }
 
-            public static SensorOutput GetOneSensor(string DevId)
+            public static DevEUIUplink GetOneSensor(string DevId)
             {
+                // Get sensor data from DB is it exists (DevId)
                 try
                 {
-                    SensorOutput sensorData = new SensorOutput();
+                    DevEUIUplink deveuiuplink = new DevEUIUplink();
                     //
                     MySqlConnection conn = GetConnection();
                     conn.Open();
@@ -65,20 +76,19 @@ namespace WebAppJson.Models
                     {
                         while (reader.Read())
                         {
-                            var isoDateTimeFormat = CultureInfo.InvariantCulture.DateTimeFormat.SortableDateTimePattern;
-                            sensorData.devid = Convert.ToString(reader["devid"]);
-                            string format = "yyyy-mm-dd hh:mm:ss";
-                            string time = Convert.ToDateTime(reader["last_time"]).ToString(format);
-                            sensorData.time = time;
-                            sensorData.lat = (float)reader["lat"];
-                            sensorData.lon = (float)reader["lon"];
-                            sensorData.alt = (float)reader["alt"];
-                            sensorData.channel = Convert.ToString(reader["channel"]);
+                            deveuiuplink.devid = Convert.ToString(reader["devid"]);
+                            //string format = "yyyy-mm-dd hh:mm:ss";
+                            //string time = Convert.ToDateTime(reader["last_time"]).ToString(format);
+                            //deveuiuplink.time = time;
+                            //deveuiuplink.lat = Convert.ToString(reader["lat"]);
+                            //deveuiuplink.lon = Convert.ToString(reader["lon"]);
+                            //deveuiuplink.alt = Convert.ToString(reader["alt"]);
+                            //deveuiuplink.channel = Convert.ToString(reader["channel"]);
 
                         }
 
                     }
-                    return sensorData;
+                    return deveuiuplink;
                 }
                 catch (Exception e)
                 {
@@ -89,14 +99,27 @@ namespace WebAppJson.Models
 
             public static async Task InsertSensorHistory(SensorOutput sensorInput)
             {
+                // Insert newly received data into DB, table history
                 try
                 {
                     using (MySqlConnection conn = GetConnection())
                     {
+                        string tlat, tlon, ttime;
+                        if (sensorInput.DevEUI_uplink.lat is null)
+                            tlat = sensorInput.DevEUI_uplink.latLrrLAT;
+                        else tlat = sensorInput.DevEUI_uplink.lat;
+                        if (sensorInput.DevEUI_uplink.lon is null)
+                            tlon = sensorInput.DevEUI_uplink.latLrrLON;
+                        else tlon = sensorInput.DevEUI_uplink.lon;
+                        if (sensorInput.DevEUI_uplink.time is null)
+                            ttime = sensorInput.DevEUI_uplink.Time;
+                        else ttime = sensorInput.DevEUI_uplink.time;
+                        string format = "yyyy-mm-dd hh:mm:ss";
+                        string time = Convert.ToDateTime(ttime).ToString(format);
                         conn.Open();
                         MySqlCommand cmd = new MySqlCommand("INSERT INTO `history` (`devid`, `time`, `lat`, `lon`, `alt`, `channel`, `rssi`, `snr`, `freq`, `port`, `payload_hex`)" +
-                            "VALUES ('" + sensorInput.devid + "', '" + sensorInput.time + "', " + sensorInput.lat + ", " + sensorInput.lon + ", " + sensorInput.alt + ", '" + sensorInput.channel +
-                            "', " + sensorInput.rssi + ", " + sensorInput.snr + ", " + sensorInput.freq + ", " + sensorInput.port + ", '" + sensorInput.payload_hex + "');", conn);
+                            "VALUES ('" + sensorInput.DevEUI_uplink.devid + "', '" + ttime + "', '" + tlat + "', '" + tlon + "', '" + sensorInput.DevEUI_uplink.alt + "', '" + sensorInput.DevEUI_uplink.channel +
+                            "', '" + sensorInput.DevEUI_uplink.rssi + "', '" + sensorInput.DevEUI_uplink.snr + "', '" + sensorInput.DevEUI_uplink.freq + "', '" + sensorInput.DevEUI_uplink.port + "', '" + sensorInput.DevEUI_uplink.payload_hex + "');", conn);
 
                         await cmd.ExecuteNonQueryAsync();
                     }
@@ -108,14 +131,27 @@ namespace WebAppJson.Models
             }
             public static async Task InsertNewSensorId(SensorOutput sensorInput)
             {
+                // If the sensor in new in DB, then add it to the table sensors
                 try
                 {
                     using (MySqlConnection conn = GetConnection())
                     {
+                        string tlat, tlon, ttime;
+                        if (sensorInput.DevEUI_uplink.lat is null)
+                            tlat = sensorInput.DevEUI_uplink.latLrrLAT;
+                        else tlat = sensorInput.DevEUI_uplink.lat;
+                        if (sensorInput.DevEUI_uplink.lon is null)
+                            tlon = sensorInput.DevEUI_uplink.latLrrLON;
+                        else tlon = sensorInput.DevEUI_uplink.lon;
+                        if (sensorInput.DevEUI_uplink.time is null)
+                            ttime = sensorInput.DevEUI_uplink.Time;
+                        else ttime = sensorInput.DevEUI_uplink.time;
+                        string format = "yyyy-mm-dd hh:mm:ss";
+                        string time = Convert.ToDateTime(ttime).ToString(format);
                         conn.Open();
                         MySqlCommand cmd = new MySqlCommand("INSERT INTO `sensors` (`devid`, `tennantid`, `name`, `Last_time`, `lat`, `lon`, `alt`, `channel`)" +
-                            "VALUES ('" + sensorInput.devid + "', '1', '" + sensorInput.devid + "', '" + sensorInput.time + "', " + sensorInput.lat + ", " + sensorInput.lon + ", " +
-                            sensorInput.alt + ", '" + sensorInput.channel + "');", conn);
+                            "VALUES ('" + sensorInput.DevEUI_uplink.devid + "', '1', '" + sensorInput.DevEUI_uplink.devid + "', '" + ttime + "', '" + tlat + "', '" + tlon + "', '" +
+                            sensorInput.DevEUI_uplink.alt + "', '" + sensorInput.DevEUI_uplink.channel + "');", conn);
 
                         await cmd.ExecuteNonQueryAsync();
                     }
@@ -127,12 +163,25 @@ namespace WebAppJson.Models
             }
             public static async Task UpdateSensorTime(SensorOutput sensorInput)
             {
+                // If the sensor is already known, just update its last_time and geo data
                 try
                 {
                     using (MySqlConnection conn = GetConnection())
                     {
+                        string tlat, tlon, ttime;
+                        if (sensorInput.DevEUI_uplink.lat is null)
+                            tlat = sensorInput.DevEUI_uplink.latLrrLAT;
+                        else tlat = sensorInput.DevEUI_uplink.lat;
+                        if (sensorInput.DevEUI_uplink.lon is null)
+                            tlon = sensorInput.DevEUI_uplink.latLrrLON;
+                        else tlon = sensorInput.DevEUI_uplink.lon;
+                        if (sensorInput.DevEUI_uplink.time is null)
+                            ttime = sensorInput.DevEUI_uplink.Time;
+                        else ttime = sensorInput.DevEUI_uplink.time;
+                        string format = "yyyy-mm-dd hh:mm:ss";
+                        string time = Convert.ToDateTime(ttime).ToString(format);
                         conn.Open();
-                        MySqlCommand cmd = new MySqlCommand("UPDATE `sensors` SET last_time='" + sensorInput.time + "' WHERE devid='" + sensorInput.devid + "';", conn);
+                        MySqlCommand cmd = new MySqlCommand("UPDATE `sensors` SET last_time='" + ttime + "', lat='" + tlat + "', lon='"+tlon+ "', alt='"+ sensorInput.DevEUI_uplink.alt + "' WHERE devid='" + sensorInput.DevEUI_uplink.devid + "';", conn);
 
                         await cmd.ExecuteNonQueryAsync();
                     }
@@ -144,6 +193,8 @@ namespace WebAppJson.Models
             }
             public static async Task UpdateSensorNameTennant(string devid, string name, int tennantid)
             {
+                // This is to be implemented for the admin interface: 
+                // to update tennant data for the new sensor
                 try
                 {
                     using (MySqlConnection conn = GetConnection())

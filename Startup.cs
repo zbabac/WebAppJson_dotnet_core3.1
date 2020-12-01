@@ -31,7 +31,7 @@ namespace WebAppJson
             services.AddControllers();
             services.Add(new ServiceDescriptor(typeof(MysqlDataContext), new MysqlDataContext(Configuration.GetConnectionString("mysqlserver"))));
             //services.AddTransient<MysqlDataContext>(_ => new MysqlDataContext(Configuration["ConnectionStrings:Default"]));
-            // IWebHostEnvironment (stored in _env) is injected into the Startup class.
+            // Configure http forwarding, maybe not neccessary
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
@@ -58,6 +58,7 @@ namespace WebAppJson
             }
             
             app.UseForwardedHeaders();
+            // Redirection neccessary if nginx https forwarding used
             app.UseHttpsRedirection();
 
             app.UseRouting();
@@ -66,6 +67,7 @@ namespace WebAppJson
 
             app.UseEndpoints(endpoints =>
             {
+                // this is neccessary to handle POST requests defined in LoraController.cs
                 endpoints.MapControllers();
             });
         }
