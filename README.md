@@ -1,4 +1,4 @@
-### This app demonstrates usage of .NET Core 3.1 handling POST (or GET) requests, parsing them (as JSON), and in this case, storing them into the MariaDB.  
+### This app demonstrates usage of .NET Core 3.1 handling POST (or GET) requests, parsing them (as JSON), and in this case, storing them into the MariaDB - all that deployed on LINUX server.  
 
 **To be more interesting, it is used to parse the data sent from IoT LoraWAN server, with real data from sensors.**  
 
