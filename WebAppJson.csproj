@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
     <UserSecretsId>f7b65d95-c2d0-488d-8eb1-558441295a98</UserSecretsId>
     <OutputType>Exe</OutputType>
   </PropertyGroup>

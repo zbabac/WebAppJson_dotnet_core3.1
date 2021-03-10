@@ -46,14 +46,18 @@ namespace WebAppJson.Models
         {
             public DevEUIUplink DevEUI_uplink { get; set; }
         }
+        public class JsonString
+        {
+            public string Jstring { get; set; }
+        }
         public class MysqlDataContext
         {
             static string ConnectionString { get; set; }
 
             public MysqlDataContext(string connectionString)
             {
-                // this is odd, for some reason gets empty strinf from Startup.cs so I add workaround here
-                ConnectionString = "server=localhost;user=sensor_admin;password=8*aKaziDino;database=sensors";
+                // this is odd, for some reason gets empty strinf from Startup.cs so I add workaround here, will try to fix this
+                ConnectionString = "server=localhost;user=sensor_admin;password=yourpassword;database=sensors";
             }
 
             static MySqlConnection GetConnection()
@@ -77,14 +81,6 @@ namespace WebAppJson.Models
                         while (reader.Read())
                         {
                             deveuiuplink.devid = Convert.ToString(reader["devid"]);
-                            //string format = "yyyy-mm-dd hh:mm:ss";
-                            //string time = Convert.ToDateTime(reader["last_time"]).ToString(format);
-                            //deveuiuplink.time = time;
-                            //deveuiuplink.lat = Convert.ToString(reader["lat"]);
-                            //deveuiuplink.lon = Convert.ToString(reader["lon"]);
-                            //deveuiuplink.alt = Convert.ToString(reader["alt"]);
-                            //deveuiuplink.channel = Convert.ToString(reader["channel"]);
-
                         }
 
                     }
@@ -114,6 +110,7 @@ namespace WebAppJson.Models
                         if (sensorInput.DevEUI_uplink.time is null)
                             ttime = sensorInput.DevEUI_uplink.Time;
                         else ttime = sensorInput.DevEUI_uplink.time;
+                        // It is neccessary to convert the format to datetime accepted by mysql
                         string format = "yyyy-mm-dd hh:mm:ss";
                         string time = Convert.ToDateTime(ttime).ToString(format);
                         conn.Open();

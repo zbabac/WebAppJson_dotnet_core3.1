@@ -17,6 +17,7 @@ namespace WebAppJson.Controllers
     [Route("[controller]")]
     public class LoraController : ControllerBase
     {
+		// Reused Weather mockup defined in original Blazor sample and added new controler
         /*private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -29,15 +30,7 @@ namespace WebAppJson.Controllers
         {
             _logger = logger;
         }
-        /*
-        public async Task InsertAsync()
-        {
-            using var cmd = Db.Connection.CreateCommand();
-            cmd.CommandText = @"INSERT INTO `sensors.history` (`devid`, `time`, `lat`, `lon`, `alt`, `rssi`, `snr`, `freq`, `port`, `payload_hex`) VALUES (@devid, @time, @lat, @lon, @alt, @rssi, @snr, @freq, @port, @payload_hex);";
-            BindParams(cmd);
-            await cmd.ExecuteNonQueryAsync();
-            //Id = (int)cmd.LastInsertedId;
-        }*/
+        
         // Route / is neccessary to tell controller where is the app that handles request
         [Route("/")]
         [HttpPost]
@@ -45,24 +38,14 @@ namespace WebAppJson.Controllers
         [Consumes("application/json")]
         // Controller watches requests and is triggered by POST, 
         // it then checks http body and stores it in SensorOutput class var
-        public IActionResult JsonFromServer([FromBody] SensorOutput jsonBody)
+        
+        //public IActionResult JsonFromServer([FromBody] SensorOutput jsonBody)
+        public IActionResult JsonFromServer([FromBody] JsonString jstr)
         {
             try
             {
-                //DevEUIUplink devroot = new DevEUIUplink();
-                //devroot = jsonBody.DevEUI_uplink;
-                // Get data from POST body sent by Lora server, only subset defined in the class SensorOutput is imported.
-                // This class will be inserted in DB. Class and methods defined in SensorData,cs
-                if (MysqlDataContext.GetOneSensor(jsonBody.DevEUI_uplink.devid).devid is null)
-                {
-                    MysqlDataContext.InsertNewSensorId(jsonBody);
-                    MysqlDataContext.InsertSensorHistory(jsonBody);
-                }
-                else
-                {
-                    MysqlDataContext.InsertSensorHistory(jsonBody);
-                    MysqlDataContext.UpdateSensorTime(jsonBody);
-                }
+				// Read JSON data from POST body and stores it into the JsonStr object
+                string retstr = jstr.ToString();
                 return Ok();
             }
             catch (Exception exc)
@@ -72,7 +55,7 @@ namespace WebAppJson.Controllers
             }
         }
 
-        /*
+        /* This is leftover from original sample, commented since GET is not used for this WebAPI
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {

@@ -21,7 +21,7 @@ namespace WebAppJson
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    // this is the place to set on which TCP ports will the app respond
+                    // this is the place to set on which TCP ports will the app respond, uncomment to change ports
                     //webBuilder.UseUrls("http://localhost:5002", "https://localhost:5003");
                 });
     }

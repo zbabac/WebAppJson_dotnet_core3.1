@@ -1,0 +1,28 @@
+[Unit]
+Description=webapi
+
+[Service]
+WorkingDirectory=/var/www/webapi
+ExecStart=/usr/bin/dotnet /var/www/webapi/WebAppJson.dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=dotnet-webapi
+User=debian
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+[Install]
+WantedBy=multi-user.target
+
+
+# dotnet service for webapi:
+# sudo nano /etc/systemd/system/kestrel-webapi.service
+# or
+# systemctl edit --full kestrel-webapi.service
+# insert config above, save, and then:
+# systemctl daemon-reload
+# sudo systemctl enable kestrel-webapi.service
+# sudo systemctl start kestrel-webapi.service 
+# now you have functional .NET Core 3.1 service on your Linux box

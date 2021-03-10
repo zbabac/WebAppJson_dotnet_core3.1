@@ -1,0 +1,150 @@
+POST https://yoursite.com/webapi HTTP/1.1
+User-Agent: Fiddler
+Content-Type: application/json
+Host: yoursite.com
+Content-Length: 1398
+
+ {
+  "DevEUI_uplink": { 
+    "-xmlns": "http://uri.actility.com/lora", 
+    "Time": "2015-07-09T16:06:38.49+02:00", 
+    "DevEUI": "000000000F1D8693", 
+    "FPort": "2", 
+    "FCntUp": "7011", 
+    "ADRbit": "1", 
+    "ACKbit": "1", 
+    "MType": "4", 
+    "FCntDn": "11", 
+    "payload_hex": "0027bd00", 
+    "mic_hex": "38e7a3b9", 
+    "Lrcid": "00000065", 
+    "LrrRSSI": "-60.000000", 
+    "LrrSNR": "9.750000", 
+    "SpFact": "7", 
+    "SubBand": "G1", 
+    "Channel": "LC2", 
+    "DevLrrCnt": "2", 
+    "Lrrid": "08040059", 
+    "Late": "0", 
+    "LrrLAT": "48.874931", 
+    "LrrLON": "2.333673", 
+    "Lrrs": { 
+      "Lrr": [ 
+        { 
+          "Lrrid": "08040059", 
+          "LrrRSSI": "-60.000000", 
+          "LrrSNR": "9.750000", 
+          "LrrESP": "-59.000000" 
+        }, 
+        { 
+          "Lrrid": "33d13a41", 
+          "LrrRSSI": "-73.000000", 
+          "LrrSNR": "9.750000", 
+          "LrrESP": "-72.000000" 
+        } 
+      ] 
+    }, 
+    "CustomerID": "100000507", 
+    "CustomerData": { 
+      "loc": { 
+        "lat": "43.58081", 
+        "lon": "1.4421667" 
+      }, 
+      "alr": { 
+        "pro": "STL", 
+        "ver": "1" 
+      } 
+    }, 
+    "ModelCfg": "0", 
+    "InstantPER": "0.02", 
+    "MeanPER": "0.02", 
+    "DevAddr": "0405F519", 
+    "UplinkDC": "0.001", 
+    "UplinkDCSubBand": "0.009" } 
+	} 
+	
+
+Lora WAN controller:
+LrnDevEui=70B3D57BA0000A57&LrnFPort=1&LrnInfos=TWA_100001252.1036.AS-1-5807496
+
+"POST /webapi?LrnDevEui=70B3D57BA0000A57&LrnFPort=1&LrnInfos=TWA_100001252.1036.AS-1-5811083 HTTP/1.1" 200 0 "-" "ACTILITY-LRCLRN-DEVICE-AGENT/1.0"
+POST /?LrnDevEui=70B3D57BA0000A57&LrnFPort=1&LrnInfos=TWA_100001252.1036.AS-1-5836449 HTTP/1.1
+Connection: keep-alive
+Host: yoursite.com
+X-Forwarded-For: xx.xx.xx.xx
+X-Forwarded-Proto: https
+Content-Length: 855
+User-Agent: ACTILITY-LRCLRN-DEVICE-AGENT/1.0
+Accept: */*
+Content-Type: application/json
+
+{"DevEUI_uplink": {"Time": "2021-01-04T20:33:57.537+01:00","DevEUI": "70B3D57BA0000A57","FPort": 1,"FCntUp": 638,"ADRbit": 1,"MType": 2,"FCntDn": 110,"payload_hex": "020a57000302a7000f0adc","mic_hex": "493190a6","Lrcid": "00000001","LrrRSSI": -111.000000,"LrrSNR": 0.500000,"SpFact": 7,"SubBand": "G1","Channel": "LC1","DevLrrCnt": 2,"Lrrid": "10000039","Late": 0,"LrrLAT": 44.776035,"LrrLON": 17.191711,"Lrrs": {"Lrr": [{"Lrrid": "10000039","Chain": 0,"LrrRSSI": -111.000000,"LrrSNR": 0.500000,"LrrESP": -113.767494},{"Lrrid": "10000056","Chain": 1,"LrrRSSI": -113.000000,"LrrSNR": -0.750000,"LrrESP": -116.401474}]},"CustomerID": "100001252","CustomerData": {"alr":{"pro":"LORA/Generic","ver":"1"}},"ModelCfg": "0","InstantPER": 0.500000,"MeanPER": 0.165362,"DevAddr": "01A294EB","TxPower": 5.000000,"NbTrans": 1,"Frequency": 868.1,"DynamicClass": "A"}}
+
+
+	// Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse); 
+    public class Lrr    {
+        public string Lrrid { get; set; } 
+        public string LrrRSSI { get; set; } 
+        public string LrrSNR { get; set; } 
+        public string LrrESP { get; set; } 
+    }
+
+    public class Lrrs    {
+        public List<Lrr> Lrr { get; set; } 
+    }
+
+    public class Loc    {
+        public string lat { get; set; } 
+        public string lon { get; set; } 
+    }
+
+    public class Alr    {
+        public string pro { get; set; } 
+        public string ver { get; set; } 
+    }
+
+    public class CustomerData    {
+        public Loc loc { get; set; } 
+        public Alr alr { get; set; } 
+    }
+
+    public class DevEUIUplink    {
+        [JsonProperty("-xmlns")]
+        public string Xmlns { get; set; } 
+        public DateTime Time { get; set; } 
+        public string DevEUI { get; set; } 
+        public string FPort { get; set; } 
+        public string FCntUp { get; set; } 
+        public string ADRbit { get; set; } 
+        public string ACKbit { get; set; } 
+        public string MType { get; set; } 
+        public string FCntDn { get; set; } 
+        public string payload_hex { get; set; } 
+        public string mic_hex { get; set; } 
+        public string Lrcid { get; set; } 
+        public string LrrRSSI { get; set; } 
+        public string LrrSNR { get; set; } 
+        public string SpFact { get; set; } 
+        public string SubBand { get; set; } 
+        public string Channel { get; set; } 
+        public string DevLrrCnt { get; set; } 
+        public string Lrrid { get; set; } 
+        public string Late { get; set; } 
+        public string LrrLAT { get; set; } 
+        public string LrrLON { get; set; } 
+        public Lrrs Lrrs { get; set; } 
+        public string CustomerID { get; set; } 
+        public CustomerData CustomerData { get; set; } 
+        public string ModelCfg { get; set; } 
+        public string InstantPER { get; set; } 
+        public string MeanPER { get; set; } 
+        public string DevAddr { get; set; } 
+        public string UplinkDC { get; set; } 
+        public string UplinkDCSubBand { get; set; } 
+    }
+
+    public class Root    {
+        public DevEUIUplink DevEUI_uplink { get; set; } 
+    }
+
+	

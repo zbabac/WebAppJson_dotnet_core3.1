@@ -30,7 +30,6 @@ namespace WebAppJson
         {
             services.AddControllers();
             services.Add(new ServiceDescriptor(typeof(MysqlDataContext), new MysqlDataContext(Configuration.GetConnectionString("mysqlserver"))));
-            //services.AddTransient<MysqlDataContext>(_ => new MysqlDataContext(Configuration["ConnectionStrings:Default"]));
             // Configure http forwarding, maybe not neccessary
             services.Configure<ForwardedHeadersOptions>(options =>
             {
